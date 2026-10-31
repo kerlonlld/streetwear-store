@@ -5,7 +5,13 @@ const StoreContext = createContext(null);
 
 export function StoreProvider({ children }) {
   const [products, setProducts] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('me-products')) || initialProducts; } catch { return initialProducts; }
+    try {
+      const savedProducts = JSON.parse(localStorage.getItem('me-products'));
+      return savedProducts?.map((product) => ({
+        ...product,
+        image: product.image?.includes('unsplash.com') ? '' : product.image,
+      })) || initialProducts;
+    } catch { return initialProducts; }
   });
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem('me-cart')) || []; } catch { return []; }
