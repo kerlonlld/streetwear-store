@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Plus, Save, Tag, Trash2 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 

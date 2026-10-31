@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Check, Plus } from 'lucide-react';
 
 const money = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

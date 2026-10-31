@@ -26,5 +26,13 @@ const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null;
 export const auth = app ? getAuth(app) : null;
 export const db = app ? getFirestore(app) : null;
 export const storage = app ? getStorage(app) : null;
-export const analytics = app && typeof window !== 'undefined' ? getAnalytics(app) : null;
+let analytics = null;
+if (app && typeof window !== 'undefined' && firebaseConfig.measurementId) {
+  try {
+    analytics = getAnalytics(app);
+  } catch {
+    analytics = null;
+  }
+}
+export { analytics };
 export const googleProvider = new GoogleAuthProvider();
