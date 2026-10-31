@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { initialProducts } from '../data/products';
 
 const StoreContext = createContext(null);
+const localProductImages = Object.fromEntries(initialProducts.map((product) => [product.id, product.image]));
 
 export function StoreProvider({ children }) {
   const [products, setProducts] = useState(() => {
@@ -9,7 +10,7 @@ export function StoreProvider({ children }) {
       const savedProducts = JSON.parse(localStorage.getItem('me-products'));
       return savedProducts?.map((product) => ({
         ...product,
-        image: product.image?.includes('unsplash.com') ? '' : product.image,
+        image: product.image?.includes('unsplash.com') || !product.image ? localProductImages[product.id] || '' : product.image,
       })) || initialProducts;
     } catch { return initialProducts; }
   });
