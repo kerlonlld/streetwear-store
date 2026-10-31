@@ -8,7 +8,7 @@ export const initialProducts = [
     originalPrice: 179.9,
     promo: true,
     sizes: ['P', 'M', 'G', 'GG'],
-    image: '/products/camiseta-mente-expansao.jpg',
+    image: '/WhatsApp%20Image%202026-10-28%20at%2021.00.54.jpeg',
     tone: 'black',
   },
   {
@@ -20,7 +20,7 @@ export const initialProducts = [
     originalPrice: 329.9,
     promo: true,
     sizes: ['P', 'M', 'G', 'GG'],
-    image: '/products/moletom-expansao-rosa.jpg',
+    image: '/WhatsApp%20Image%202026-10-28%20at%2021.00.55.jpeg',
     tone: 'pink',
   },
   {
@@ -32,7 +32,7 @@ export const initialProducts = [
     originalPrice: null,
     promo: false,
     sizes: ['35–38', '39–42', '43–46'],
-    image: '/products/meias-manifesto.jpg',
+    image: '/WhatsApp%20Image%202026-10-28%20at%2021.00.56.jpeg',
     tone: 'black',
   },
 ];

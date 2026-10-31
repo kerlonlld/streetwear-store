@@ -10,7 +10,7 @@ export function StoreProvider({ children }) {
       const savedProducts = JSON.parse(localStorage.getItem('me-products'));
       return savedProducts?.map((product) => ({
         ...product,
-        image: product.image?.includes('unsplash.com') || !product.image ? localProductImages[product.id] || '' : product.image,
+        image: product.image?.includes('unsplash.com') || product.image?.startsWith('/products/') || !product.image ? localProductImages[product.id] || '' : product.image,
       })) || initialProducts;
     } catch { return initialProducts; }
   });
