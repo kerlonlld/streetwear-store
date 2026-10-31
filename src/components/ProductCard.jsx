@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, Plus } from 'lucide-react';
+import { Check, ShoppingBag } from 'lucide-react';
 
 const money = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -36,8 +36,8 @@ export default function ProductCard({ product, onAdd }) {
               <button className={size === itemSize ? 'selected' : ''} key={itemSize} onClick={() => setSize(itemSize)}>{itemSize}</button>
             ))}
           </div>
-          <button className={`add-button ${added ? 'added' : ''}`} onClick={handleAdd} aria-label={`Adicionar ${product.name}`}>
-            {added ? <Check size={18} /> : <Plus size={18} />}
+          <button className={`buy-button ${added ? 'added' : ''}`} onClick={handleAdd} aria-label={`Comprar ${product.name}`}>
+            {added ? <><Check size={16} /> Adicionado</> : <><ShoppingBag size={16} /> Comprar agora</>}
           </button>
         </div>
       </div>
