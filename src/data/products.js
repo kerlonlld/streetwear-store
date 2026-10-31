@@ -8,7 +8,7 @@ export const initialProducts = [
     originalPrice: 179.9,
     promo: true,
     sizes: ['P', 'M', 'G', 'GG'],
-    image: 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=900&q=85',
+    image: '',
     tone: 'black',
   },
   {
@@ -20,7 +20,7 @@ export const initialProducts = [
     originalPrice: 329.9,
     promo: true,
     sizes: ['P', 'M', 'G', 'GG'],
-    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85',
+    image: '',
     tone: 'pink',
   },
   {
@@ -32,7 +32,7 @@ export const initialProducts = [
     originalPrice: null,
     promo: false,
     sizes: ['35–38', '39–42', '43–46'],
-    image: 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=900&q=85',
+    image: '',
     tone: 'black',
   },
 ];
