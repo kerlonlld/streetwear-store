@@ -54,6 +54,28 @@ function Checkout({ user }) {
 
 function App() { const [user, setUser] = useState(null); const [ready, setReady] = useState(!isFirebaseConfigured); const location = useLocation(); useEffect(() => { if (!auth) return undefined; return onAuthStateChanged(auth, (current) => { setUser(current); setReady(true); }); }, []); if (!ready) return <div className="loading-screen">Carregando...</div>; return <StoreProvider><StoreShell user={user} setUser={setUser} location={location} /></StoreProvider>; }
 
-function StoreShell({ user, setUser, location }) { const { addToCart } = useStore(); const navigate = useNavigate(); const isAdmin = user?.email && user.email === import.meta.env.VITE_ADMIN_EMAIL; const goToCheckout = () => navigate(user ? '/checkout' : '/login'); const buyNow = (product, size) => { if (!user) { navigate('/login'); return; } addToCart(product, size); navigate('/checkout'); }; return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} /><Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={isAdmin ? <Admin user={user} /> : <Navigate to={user ? '/' : '/login'} state={{ from: location }} replace />} /></Routes></>; }
+function StoreShell({ user, setUser, location }) {
+  const { addToCart } = useStore();
+  const navigate = useNavigate();
+  const isAdmin = user?.email && user.email === import.meta.env.VITE_ADMIN_EMAIL;
+  const goToCheckout = () => navigate(user ? '/checkout' : '/login');
+  const buyNow = (product, size) => { if (!user) { navigate('/login'); return; } addToCart(product, size); navigate('/checkout'); };
+
+  useEffect(() => {
+    const revealGroups = [
+      ['.site-header', '.hero-copy', '.hero-art', '.hero-footer', '.section-heading', '.statement', '.auth-panel', '.auth-image', '.checkout-content', '.checkout-summary', '.admin-top', '.admin-layout'],
+      ['.product-card'],
+    ];
+    const elements = revealGroups.flatMap((selectors, groupIndex) => selectors.flatMap((selector) => [...document.querySelectorAll(selector)].map((element) => {
+      element.classList.add(groupIndex === 1 ? 'reveal-up' : 'reveal-down');
+      return element;
+    })));
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.target.classList.toggle('is-visible', entry.isIntersecting)), { threshold: 0.12 });
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [location.pathname]);
+
+  return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} /><Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={isAdmin ? <Admin user={user} /> : <Navigate to={user ? '/' : '/login'} state={{ from: location }} replace />} /></Routes></>;
+}
 
 export default function AppRoot() { return <App />; }
