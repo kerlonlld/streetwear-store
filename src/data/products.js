@@ -8,7 +8,7 @@ export const initialProducts = [
     originalPrice: 179.9,
     promo: true,
     sizes: ['P', 'M', 'G', 'GG'],
-    image: '/WhatsApp%20Image%202026-10-28%20at%2021.00.54.jpeg',
+    image: '/WhatsApp%20Image%202026-10-28%20at%2021.00.55.jpeg',
     tone: 'black',
   },
   {
@@ -20,7 +20,7 @@ export const initialProducts = [
     originalPrice: 329.9,
     promo: true,
     sizes: ['P', 'M', 'G', 'GG'],
-    image: '/WhatsApp%20Image%202026-10-28%20at%2021.00.55.jpeg',
+    image: '/WhatsApp%20Image%202026-10-28%20at%2021.00.54.jpeg',
     tone: 'pink',
   },
   {
