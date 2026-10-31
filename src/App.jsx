@@ -15,7 +15,7 @@ function Header({ user, onLogout, onCheckout }) {
   return <>
     <header className="site-header">
       <Link to="/" className="brand"><span>ME</span><strong>MENTE EM<br />EXPANSÃO</strong></Link>
-      <nav><a href="#drop">Drop 01</a><a href="#manifesto">Manifesto</a><Link to="/admin">Admin</Link></nav>
+      <nav><a href="#drop">Drop 01</a><a href="#manifesto">Manifesto</a></nav>
       <div className="header-tools">
         {user ? <button className="user-chip" onClick={onLogout}>{user.email?.split('@')[0]} / sair</button> : <Link to="/login" className="login-link">Entrar</Link>}
         <button className="cart-trigger" onClick={onCheckout} aria-label="Ir para checkout"><ShoppingBag size={19} /><b>{cartCount}</b></button>
@@ -52,12 +52,29 @@ function Checkout({ user }) {
   return <main className="checkout-page"><div className="checkout-content"><Link to="/" className="back-link">← Voltar à loja</Link><span className="eyebrow">Finalizar pedido</span><h1>Leve a ideia<br /><i>com você.</i></h1><form className="address-form" onSubmit={submit}><h2>Endereço de entrega</h2><div className="input-grid"><label>CEP<input required value={form.cep} onChange={(e) => setForm({ ...form, cep: e.target.value })} /></label><label>Estado<input required value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} /></label></div><label>Rua<input required value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} /></label><div className="input-grid"><label>Número<input required value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} /></label><label>Bairro<input required value={form.neighborhood} onChange={(e) => setForm({ ...form, neighborhood: e.target.value })} /></label></div><label>Cidade<input required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></label><button className="primary-button" disabled={loading || !cart.length}>{loading ? 'Salvando...' : 'Confirmar pedido'} <ArrowRight size={17} /></button></form></div><aside className="checkout-summary"><span className="eyebrow">Resumo <em>({cart.length})</em></span>{cart.map((item) => <div className="summary-item" key={`${item.id}-${item.size}`}><img src={item.image} alt="" /><div><strong>{item.name}</strong><span>{item.size} · {item.quantity}x</span></div><b>{money(item.price * item.quantity)}</b><button onClick={() => removeFromCart(item.id, item.size)} aria-label="Remover"><X size={14} /></button></div>)}<div className="summary-total"><span>Total</span><strong>{money(subtotal)}</strong></div></aside></main>;
 }
 
+function AdminGate() {
+  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem('me-admin-unlocked') === 'true');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const unlock = (event) => {
+    event.preventDefault();
+    if (password === (import.meta.env.VITE_ADMIN_PASSWORD || '')) {
+      sessionStorage.setItem('me-admin-unlocked', 'true');
+      setUnlocked(true);
+      return;
+    }
+    setError('Senha incorreta.');
+    setPassword('');
+  };
+  if (unlocked) return <Admin />;
+  return <main className="auth-page"><div className="auth-panel"><Link to="/" className="brand"><span>ME</span><strong>MENTE EM<br />EXPANSÃO</strong></Link><span className="eyebrow">Acesso reservado</span><h1>Painel privado.</h1><p>Digite a senha para gerenciar produtos, preços e imagens.</p><form onSubmit={unlock}><label>Senha<input autoFocus type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>{error && <div className="form-error">{error}</div>}<button className="primary-button full">Entrar no painel <ArrowRight size={17} /></button></form></div><div className="auth-image"><span>CONTROLE<br />DO DROP.</span></div></main>;
+}
+
 function App() { const [user, setUser] = useState(null); const [ready, setReady] = useState(!isFirebaseConfigured); const location = useLocation(); useEffect(() => { if (!auth) return undefined; return onAuthStateChanged(auth, (current) => { setUser(current); setReady(true); }); }, []); if (!ready) return <div className="loading-screen">Carregando...</div>; return <StoreProvider><StoreShell user={user} setUser={setUser} location={location} /></StoreProvider>; }
 
 function StoreShell({ user, setUser, location }) {
   const { addToCart } = useStore();
   const navigate = useNavigate();
-  const isAdmin = user?.email && user.email === import.meta.env.VITE_ADMIN_EMAIL;
   const goToCheckout = () => navigate(user ? '/checkout' : '/login');
   const buyNow = (product, size) => { if (!user) { navigate('/login'); return; } addToCart(product, size); navigate('/checkout'); };
 
@@ -75,7 +92,7 @@ function StoreShell({ user, setUser, location }) {
     return () => observer.disconnect();
   }, [location.pathname]);
 
-  return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} /><Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={isAdmin ? <Admin user={user} /> : <Navigate to={user ? '/' : '/login'} state={{ from: location }} replace />} /></Routes></>;
+  return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} /><Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={<AdminGate />} /></Routes></>;
 }
 
 export default function AppRoot() { return <App />; }
