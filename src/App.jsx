@@ -10,19 +10,17 @@ import Admin from './pages/Admin';
 
 const money = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-function Header({ user, onLogout }) {
+function Header({ user, onLogout, onCheckout }) {
   const { cartCount } = useStore();
-  const [cartOpen, setCartOpen] = useState(false);
   return <>
     <header className="site-header">
       <Link to="/" className="brand"><span>ME</span><strong>MENTE EM<br />EXPANSÃO</strong></Link>
       <nav><a href="#drop">Drop 01</a><a href="#manifesto">Manifesto</a><Link to="/admin">Admin</Link></nav>
       <div className="header-tools">
         {user ? <button className="user-chip" onClick={onLogout}>{user.email?.split('@')[0]} / sair</button> : <Link to="/login" className="login-link">Entrar</Link>}
-        <button className="cart-trigger" onClick={() => setCartOpen(true)} aria-label="Abrir carrinho"><ShoppingBag size={19} /><b>{cartCount}</b></button>
+        <button className="cart-trigger" onClick={onCheckout} aria-label="Ir para checkout"><ShoppingBag size={19} /><b>{cartCount}</b></button>
       </div>
     </header>
-    {cartOpen && <CartDrawer onClose={() => setCartOpen(false)} />}
   </>;
 }
 
@@ -36,9 +34,9 @@ function CartDrawer({ onClose }) {
   </aside></div>;
 }
 
-function Home({ onAdd }) {
+function Home({ onBuy }) {
   const { products } = useStore();
-  return <main><section className="hero" id="manifesto"><div className="hero-copy reveal-up"><span className="eyebrow">Drop 01 / 2026</span><h1>Vista o que<br /><i>expande.</i></h1><p>Streetwear para mentes inquietas. Peças que carregam sua presença antes mesmo de você falar.</p><a className="primary-button" href="#drop">Explorar peças <ArrowRight size={17} /></a></div><div className="hero-art"><div className="hero-circle"></div><span className="hero-word">EXPANSÃO</span><span className="hero-vertical">NÃO EXISTE LIMITE</span><div className="hero-scribble">Mente<br />livre.</div></div><div className="hero-footer"><span>Scroll para descobrir</span><span>↓</span><span>01 — 03</span></div></section><section className="drop-section" id="drop"><div className="section-heading"><div><span className="eyebrow">A seleção</span><h2>Drop 01<span>.</span></h2></div><p>Três peças. Uma ideia.<br />A sua expansão começa aqui.</p></div><div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} onAdd={onAdd} />)}</div></section><section className="statement"><span>ME</span><h2>O corpo é<br /><i>território.</i></h2><p>Feito para quem transforma pensamento em movimento.</p></section></main>;
+  return <main><section className="hero" id="manifesto"><div className="hero-copy reveal-up"><span className="eyebrow">Drop 01 / 2026</span><h1>Vista o que<br /><i>expande.</i></h1><p>Streetwear para mentes inquietas. Peças que carregam sua presença antes mesmo de você falar.</p><a className="primary-button" href="#drop">Explorar peças <ArrowRight size={17} /></a></div><div className="hero-art"><div className="hero-circle"></div><span className="hero-word">EXPANSÃO</span><span className="hero-vertical">NÃO EXISTE LIMITE</span><div className="hero-scribble">Mente<br />livre.</div></div><div className="hero-footer"><span>Scroll para descobrir</span><span>↓</span><span>01 — 03</span></div></section><section className="drop-section" id="drop"><div className="section-heading"><div><span className="eyebrow">A seleção</span><h2>Drop 01<span>.</span></h2></div><p>Três peças. Uma ideia.<br />A sua expansão começa aqui.</p></div><div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} onAdd={onBuy} />)}</div></section><section className="statement"><span>ME</span><h2>O corpo é<br /><i>território.</i></h2><p>Feito para quem transforma pensamento em movimento.</p></section></main>;
 }
 
 function Login({ onLogin }) {
@@ -56,6 +54,6 @@ function Checkout({ user }) {
 
 function App() { const [user, setUser] = useState(null); const [ready, setReady] = useState(!isFirebaseConfigured); const location = useLocation(); useEffect(() => { if (!auth) return undefined; return onAuthStateChanged(auth, (current) => { setUser(current); setReady(true); }); }, []); if (!ready) return <div className="loading-screen">Carregando...</div>; return <StoreProvider><StoreShell user={user} setUser={setUser} location={location} /></StoreProvider>; }
 
-function StoreShell({ user, setUser, location }) { const { addToCart } = useStore(); const isAdmin = user?.email && user.email === import.meta.env.VITE_ADMIN_EMAIL; return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} /><Routes><Route path="/" element={<Home onAdd={addToCart} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={<Checkout user={user} />} /><Route path="/admin" element={isAdmin ? <Admin user={user} /> : <Navigate to={user ? '/' : '/login'} state={{ from: location }} replace />} /></Routes></>; }
+function StoreShell({ user, setUser, location }) { const { addToCart } = useStore(); const navigate = useNavigate(); const isAdmin = user?.email && user.email === import.meta.env.VITE_ADMIN_EMAIL; const goToCheckout = () => navigate(user ? '/checkout' : '/login'); const buyNow = (product, size) => { if (!user) { navigate('/login'); return; } addToCart(product, size); navigate('/checkout'); }; return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} /><Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={isAdmin ? <Admin user={user} /> : <Navigate to={user ? '/' : '/login'} state={{ from: location }} replace />} /></Routes></>; }
 
 export default function AppRoot() { return <App />; }
