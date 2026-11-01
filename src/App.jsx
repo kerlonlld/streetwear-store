@@ -71,9 +71,9 @@ function AdminGate() {
   return <main className="auth-page"><div className="auth-panel"><Link to="/" className="brand"><span>ME</span><strong>MENTE EM<br />EXPANSÃO</strong></Link><span className="eyebrow">Acesso reservado</span><h1>Painel privado.</h1><p>Digite a senha para gerenciar produtos, preços e imagens.</p><form onSubmit={unlock}><label>Senha<input autoFocus type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>{error && <div className="form-error">{error}</div>}<button className="primary-button full">Entrar no painel <ArrowRight size={17} /></button></form></div><div className="auth-image"><span>CONTROLE<br />DO DROP.</span></div></main>;
 }
 
-function App() { const [user, setUser] = useState(null); const [ready, setReady] = useState(!isFirebaseConfigured); const location = useLocation(); useEffect(() => { if (!auth) return undefined; getRedirectResult(auth).catch(() => undefined); return onAuthStateChanged(auth, (current) => { setUser(current); setReady(true); }); }, []); if (!ready) return <div className="loading-screen">Carregando...</div>; return <StoreProvider><StoreShell user={user} setUser={setUser} location={location} /></StoreProvider>; }
+function App() { const [user, setUser] = useState(null); const [ready, setReady] = useState(!isFirebaseConfigured); const [redirectError, setRedirectError] = useState(''); const location = useLocation(); useEffect(() => { if (!auth) return undefined; getRedirectResult(auth).catch((err) => setRedirectError(err.code || err.message || 'Falha ao retornar do Google.')); return onAuthStateChanged(auth, (current) => { setUser(current); setReady(true); }); }, []); if (!ready) return <div className="loading-screen">Carregando...</div>; return <StoreProvider><StoreShell user={user} setUser={setUser} location={location} redirectError={redirectError} /></StoreProvider>; }
 
-function StoreShell({ user, setUser, location }) {
+function StoreShell({ user, setUser, location, redirectError }) {
   const { addToCart } = useStore();
   const navigate = useNavigate();
   const goToCheckout = () => navigate(user ? '/checkout' : '/login');
@@ -93,7 +93,7 @@ function StoreShell({ user, setUser, location }) {
     return () => observer.disconnect();
   }, [location.pathname]);
 
-  return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} /><Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={<AdminGate />} /><Route path="/admim" element={<Navigate to="/admin" replace />} /></Routes></>;
+  return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} />{redirectError && <div className="notice auth-redirect-error">Google: {redirectError}</div>}<Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={<AdminGate />} /><Route path="/admim" element={<Navigate to="/admin" replace />} /></Routes></>;
 }
 
 export default function AppRoot() { return <App />; }
