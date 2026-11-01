@@ -4,7 +4,7 @@ import { ArrowRight, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import { StoreProvider, useStore } from './context/StoreContext';
 import { auth, db, googleProvider, isFirebaseConfigured } from './services/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, getRedirectResult, onAuthStateChanged, signInWithEmailAndPassword, signInWithRedirect, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
 import ProductCard from './components/ProductCard';
 import Admin from './pages/Admin';
 
@@ -14,7 +14,7 @@ function Header({ user, onLogout, onCheckout }) {
   const { cartCount } = useStore();
   return <>
     <header className="site-header">
-      <Link to="/" className="brand"><span>ME</span><strong>MENTE EM<br />EXPANSÃO</strong></Link>
+      <Link to="/" className="brand"><span>H</span><strong>HEMPARIA</strong></Link>
       <nav><a href="#drop">Drop 01</a><a href="#manifesto">Manifesto</a></nav>
       <div className="header-tools">
         {user ? <button className="user-chip" onClick={onLogout}>{user.email?.split('@')[0]} / sair</button> : <Link to="/login" className="login-link">Entrar</Link>}
@@ -36,14 +36,30 @@ function CartDrawer({ onClose }) {
 
 function Home({ onBuy }) {
   const { products } = useStore();
-  return <main><section className="hero" id="manifesto"><div className="hero-copy reveal-up"><span className="eyebrow">Drop 01 / 2026</span><h1>Vista o que<br /><i>expande.</i></h1><p>Streetwear para mentes inquietas. Peças que carregam sua presença antes mesmo de você falar.</p><a className="primary-button" href="#drop">Explorar peças <ArrowRight size={17} /></a></div><div className="hero-art"><div className="hero-circle"></div><span className="hero-word">EXPANSÃO</span><span className="hero-vertical">NÃO EXISTE LIMITE</span><div className="hero-scribble">Mente<br />livre.</div></div><div className="hero-footer"><span>Scroll para descobrir</span><span>↓</span><span>01 — 03</span></div></section><section className="drop-section" id="drop"><div className="section-heading"><div><span className="eyebrow">A seleção</span><h2>Drop 01<span>.</span></h2></div><p>Três peças. Uma ideia.<br />A sua expansão começa aqui.</p></div><div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} onAdd={onBuy} />)}</div></section><section className="statement"><span>ME</span><h2>O corpo é<br /><i>território.</i></h2><p>Feito para quem transforma pensamento em movimento.</p></section></main>;
+  return <main><section className="hero" id="manifesto"><div className="hero-copy reveal-up"><span className="eyebrow">Drop 01 / 2026</span><h1>Hem<i>paria.</i></h1><p>Streetwear para mentes inquietas. Peças que carregam sua presença antes mesmo de você falar.</p><a className="primary-button" href="#drop">Explorar peças <ArrowRight size={17} /></a></div><div className="hero-art"><div className="hero-circle"></div><span className="hero-word">HEMPARIA</span><span className="hero-vertical">NÃO EXISTE LIMITE</span></div><div className="hero-footer"><span>Scroll para descobrir</span><span>↓</span><span>01 — 03</span></div></section><section className="drop-section" id="drop"><div className="section-heading"><div><span className="eyebrow">A seleção</span><h2>Drop 01<span>.</span></h2></div><p>Três peças. Uma ideia.<br />A sua expansão começa aqui.</p></div><div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} onAdd={onBuy} />)}</div></section><section className="statement"><span>HR</span><h2>O corpo é<br /><i>território.</i></h2><p>Feito para quem transforma pensamento em movimento.</p></section></main>;
 }
 
 function Login({ onLogin }) {
-  const navigate = useNavigate(); const [mode, setMode] = useState('login'); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false); const [googleBusy, setGoogleBusy] = useState(false);
-  const submit = async (event) => { event.preventDefault(); setBusy(true); setError(''); try { if (!isFirebaseConfigured) throw new Error('Configure o Firebase no arquivo .env para entrar.'); const result = mode === 'login' ? await signInWithEmailAndPassword(auth, email, password) : await createUserWithEmailAndPassword(auth, email, password); onLogin(result.user); navigate('/'); } catch (err) { setError(err.message || 'Não foi possível continuar.'); } finally { setBusy(false); } };
-  const loginWithGoogle = async () => { setGoogleBusy(true); setError(''); try { if (!isFirebaseConfigured || !auth) throw new Error('Firebase não está configurado neste deploy.'); await signInWithRedirect(auth, googleProvider); } catch (err) { const messages = { 'auth/unauthorized-domain': 'Este domínio ainda não foi autorizado no Firebase.', 'auth/operation-not-allowed': 'O login com Google ainda não foi habilitado no Firebase.' }; setError(messages[err.code] || err.message || 'Não foi possível entrar com Google.'); setGoogleBusy(false); } };
-  return <main className="auth-page"><div className="auth-panel"><Link to="/" className="brand"><span>ME</span><strong>MENTE EM<br />EXPANSÃO</strong></Link><span className="eyebrow">Área de acesso</span><h1>{mode === 'login' ? 'Entre no seu movimento.' : 'Faça parte da expansão.'}</h1><p>{mode === 'login' ? 'Acompanhe seus pedidos e mantenha seu drop por perto.' : 'Crie sua conta e vista ideias que não ficam paradas.'}</p><form onSubmit={submit}><label>E-mail<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label><label>Senha<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength="6" required /></label>{error && <div className="form-error">{error}</div>}<button className="primary-button full" disabled={busy || googleBusy}>{busy ? 'Aguarde...' : mode === 'login' ? 'Entrar' : 'Criar conta'} <ArrowRight size={17} /></button></form>{isFirebaseConfigured && <button className="google-button" disabled={googleBusy || busy} onClick={loginWithGoogle}>{googleBusy ? 'Abrindo Google...' : 'Continuar com Google'}</button>}<button className="switch-auth" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>{mode === 'login' ? 'Ainda não tenho conta' : 'Já tenho uma conta'}</button></div><div className="auth-image"><span>EXPANDA<br />O CAMPO.</span></div></main>;
+  const navigate = useNavigate(); const [mode, setMode] = useState('login'); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [error, setError] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false); const [googleBusy, setGoogleBusy] = useState(false); const [resetBusy, setResetBusy] = useState(false);
+  const firebaseError = (err) => ({
+    'auth/invalid-credential': 'E-mail ou senha incorretos.',
+    'auth/user-not-found': 'Não existe uma conta com este e-mail.',
+    'auth/wrong-password': 'E-mail ou senha incorretos.',
+    'auth/invalid-email': 'Digite um e-mail válido.',
+    'auth/user-disabled': 'Esta conta foi desativada no Firebase.',
+    'auth/too-many-requests': 'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente, ou use o botão "Esqueci minha senha".',
+    'auth/network-request-failed': 'Não foi possível conectar ao Firebase. Verifique sua internet e tente novamente.',
+    'auth/email-already-in-use': 'Este e-mail já possui uma conta. Entre em vez de criar outra.',
+    'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.',
+    'auth/unauthorized-domain': 'Autorize o domínio do Vercel e do Render no Firebase em Authentication > Settings > Authorized domains.',
+    'auth/operation-not-allowed': 'Ative o provedor escolhido em Firebase > Authentication > Sign-in method.',
+    'auth/popup-blocked': 'O navegador bloqueou a janela do Google. Permita pop-ups para este site.',
+    'auth/popup-closed-by-user': 'A janela do Google foi fechada antes do login.',
+  }[err.code] || err.message || 'Não foi possível continuar.');
+  const resetPassword = async () => { setResetBusy(true); setError(''); setNotice(''); try { if (!isFirebaseConfigured || !auth) throw new Error('Firebase não está configurado neste deploy.'); if (!email.trim()) throw new Error('Digite seu e-mail acima para receber o link.'); await sendPasswordResetEmail(auth, email.trim()); setNotice('Enviamos um link para criar uma nova senha.'); } catch (err) { setError(firebaseError(err)); } finally { setResetBusy(false); } };
+  const submit = async (event) => { event.preventDefault(); setBusy(true); setError(''); setNotice(''); try { if (!isFirebaseConfigured || !auth) throw new Error('Firebase não está configurado neste deploy.'); const result = mode === 'login' ? await signInWithEmailAndPassword(auth, email.trim(), password) : await createUserWithEmailAndPassword(auth, email.trim(), password); onLogin(result.user); navigate('/'); } catch (err) { setError(firebaseError(err)); } finally { setBusy(false); } };
+  const loginWithGoogle = async () => { setGoogleBusy(true); setError(''); setNotice(''); try { if (!isFirebaseConfigured || !auth) throw new Error('Firebase não está configurado neste deploy.'); const result = await signInWithPopup(auth, googleProvider); onLogin(result.user); navigate('/'); } catch (err) { setError(firebaseError(err)); } finally { setGoogleBusy(false); } };
+  return <main className="auth-page"><div className="auth-panel"><Link to="/" className="brand"><span>H</span><strong>HEMPARIA</strong></Link><span className="eyebrow">Área de acesso</span><h1>{mode === 'login' ? 'Entre no seu movimento.' : 'Faça parte da expansão.'}</h1><p>{mode === 'login' ? 'Acompanhe seus pedidos e mantenha seu drop por perto.' : 'Crie sua conta e vista ideias que não ficam paradas.'}</p><form onSubmit={submit}><label>E-mail<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label><label>Senha<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength="6" required /></label>{error && <div className="form-error">{error}</div>}{notice && <div className="form-notice">{notice}</div>}<button className="primary-button full" disabled={busy || googleBusy || resetBusy}>{busy ? 'Aguarde...' : mode === 'login' ? 'Entrar' : 'Criar conta'} <ArrowRight size={17} /></button></form>{mode === 'login' && <button className="switch-auth" disabled={resetBusy || busy || googleBusy} onClick={resetPassword}>{resetBusy ? 'Enviando...' : 'Esqueci minha senha'}</button>}{isFirebaseConfigured && <button className="google-button" disabled={googleBusy || busy || resetBusy} onClick={loginWithGoogle}>{googleBusy ? 'Abrindo Google...' : 'Continuar com Google'}</button>}<button className="switch-auth" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setNotice(''); }}>{mode === 'login' ? 'Ainda não tenho conta' : 'Já tenho uma conta'}</button></div><div className="auth-image"><span>EXPANDA<br />O CAMPO.</span></div></main>;
 }
 
 function Checkout({ user }) {
@@ -68,12 +84,12 @@ function AdminGate() {
     setPassword('');
   };
   if (unlocked) return <Admin />;
-  return <main className="auth-page"><div className="auth-panel"><Link to="/" className="brand"><span>ME</span><strong>MENTE EM<br />EXPANSÃO</strong></Link><span className="eyebrow">Acesso reservado</span><h1>Painel privado.</h1><p>Digite a senha para gerenciar produtos, preços e imagens.</p><form onSubmit={unlock}><label>Senha<input autoFocus type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>{error && <div className="form-error">{error}</div>}<button className="primary-button full">Entrar no painel <ArrowRight size={17} /></button></form></div><div className="auth-image"><span>CONTROLE<br />DO DROP.</span></div></main>;
+  return <main className="auth-page"><div className="auth-panel"><Link to="/" className="brand"><span>H</span><strong>HEMPARIA</strong></Link><span className="eyebrow">Acesso reservado</span><h1>Painel privado.</h1><p>Digite a senha para gerenciar produtos, preços e imagens.</p><form onSubmit={unlock}><label>Senha<input autoFocus type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>{error && <div className="form-error">{error}</div>}<button className="primary-button full">Entrar no painel <ArrowRight size={17} /></button></form></div><div className="auth-image"><span>CONTROLE<br />DO DROP.</span></div></main>;
 }
 
-function App() { const [user, setUser] = useState(null); const [ready, setReady] = useState(!isFirebaseConfigured); const [redirectError, setRedirectError] = useState(''); const location = useLocation(); useEffect(() => { if (!auth) return undefined; getRedirectResult(auth).catch((err) => setRedirectError(err.code || err.message || 'Falha ao retornar do Google.')); return onAuthStateChanged(auth, (current) => { setUser(current); setReady(true); }); }, []); if (!ready) return <div className="loading-screen">Carregando...</div>; return <StoreProvider><StoreShell user={user} setUser={setUser} location={location} redirectError={redirectError} /></StoreProvider>; }
+function App() { const [user, setUser] = useState(null); const [ready, setReady] = useState(!isFirebaseConfigured); const location = useLocation(); useEffect(() => { if (!auth) return undefined; return onAuthStateChanged(auth, (current) => { setUser(current); setReady(true); }); }, []); if (!ready) return <div className="loading-screen">Carregando...</div>; return <StoreProvider><StoreShell user={user} setUser={setUser} location={location} /></StoreProvider>; }
 
-function StoreShell({ user, setUser, location, redirectError }) {
+function StoreShell({ user, setUser, location }) {
   const { addToCart } = useStore();
   const navigate = useNavigate();
   const goToCheckout = () => navigate(user ? '/checkout' : '/login');
@@ -93,7 +109,7 @@ function StoreShell({ user, setUser, location, redirectError }) {
     return () => observer.disconnect();
   }, [location.pathname]);
 
-  return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} />{redirectError && <div className="notice auth-redirect-error">Google: {redirectError}</div>}<Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={<AdminGate />} /><Route path="/admim" element={<Navigate to="/admin" replace />} /></Routes></>;
+  return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} /><Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={<AdminGate />} /><Route path="/admim" element={<Navigate to="/admin" replace />} /></Routes></>;
 }
 
 export default function AppRoot() { return <App />; }
