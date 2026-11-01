@@ -92,7 +92,7 @@ function StoreShell({ user, setUser, location }) {
     return () => observer.disconnect();
   }, [location.pathname]);
 
-  return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} /><Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={<AdminGate />} /></Routes></>;
+  return <><Header user={user} onLogout={() => { signOut(auth); setUser(null); }} onCheckout={goToCheckout} /><Routes><Route path="/" element={<Home onBuy={buyNow} />} /><Route path="/login" element={<Login onLogin={setUser} />} /><Route path="/checkout" element={user ? <Checkout user={user} /> : <Navigate to="/login" state={{ from: location }} replace />} /><Route path="/admin" element={<AdminGate />} /><Route path="/admim" element={<Navigate to="/admin" replace />} /></Routes></>;
 }
 
 export default function AppRoot() { return <App />; }
