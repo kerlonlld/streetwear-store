@@ -2,5 +2,13 @@
   "rewrites": [
     { "source": "/admim", "destination": "/admin" },
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cross-Origin-Opener-Policy", "value": "unsafe-none" }
+      ]
+    }
   ]
 }
