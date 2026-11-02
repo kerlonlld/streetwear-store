@@ -18,7 +18,7 @@ export default function ProductCard({ product, onAdd }) {
       <div className={`product-image ${product.tone}`}>
         {product.image ? <img src={product.image} alt={product.name} loading="lazy" /> : <div className="image-placeholder"><span>ME</span><small>Imagem no painel admin</small></div>}
         {product.promo && <span className="promo-badge">Oferta</span>}
-        <span className="product-index">0{product.id === 'wolf-tee' ? 1 : product.id === 'pink-hoodie' ? 2 : 3}</span>
+        <span className="product-index">0{product.id === 'wolf-tee' || product.id === 'hemparia-shirt' ? 1 : product.id === 'pink-hoodie' || product.id === 'hemparia-jacket' ? 2 : 3}</span>
       </div>
       <div className="product-info">
         <div className="product-heading">
