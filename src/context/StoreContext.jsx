@@ -4,14 +4,19 @@ import { initialProducts } from '../data/products';
 const StoreContext = createContext(null);
 const localProductImages = Object.fromEntries(initialProducts.map((product) => [product.id, product.image]));
 
+const normalizeProduct = (product) => ({
+  ...product,
+  image: product.image?.includes('unsplash.com') || product.image?.startsWith('/products/') || !product.image ? localProductImages[product.id] || '' : product.image,
+});
+
 export function StoreProvider({ children }) {
   const [products, setProducts] = useState(() => {
     try {
-      const savedProducts = JSON.parse(localStorage.getItem('me-products'));
-      return savedProducts?.map((product) => ({
-        ...product,
-        image: product.image?.includes('unsplash.com') || product.image?.startsWith('/products/') || !product.image ? localProductImages[product.id] || '' : product.image,
-      })) || initialProducts;
+      const savedProducts = JSON.parse(localStorage.getItem('me-products')) || [];
+      const savedById = new Map(savedProducts.map((product) => [product.id, product]));
+      const mergedInitialProducts = initialProducts.map((product) => normalizeProduct({ ...product, ...savedById.get(product.id) }));
+      const customProducts = savedProducts.filter((product) => !initialProducts.some((initialProduct) => initialProduct.id === product.id));
+      return [...mergedInitialProducts, ...customProducts.map(normalizeProduct)];
     } catch { return initialProducts; }
   });
   const [cart, setCart] = useState(() => {
