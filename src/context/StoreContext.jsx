@@ -14,7 +14,12 @@ export function StoreProvider({ children }) {
     try {
       const savedProducts = JSON.parse(localStorage.getItem('me-products')) || [];
       const savedById = new Map(savedProducts.map((product) => [product.id, product]));
-      const mergedInitialProducts = initialProducts.map((product) => normalizeProduct({ ...product, ...savedById.get(product.id) }));
+      const mergedInitialProducts = initialProducts.map((product) => {
+        const savedProduct = savedById.get(product.id);
+        const mergedProduct = { ...product, ...savedProduct };
+        if (product.id === 'hemparia-shirt' && savedProduct?.name === 'Camisa Hemparia') mergedProduct.name = product.name;
+        return normalizeProduct(mergedProduct);
+      });
       const customProducts = savedProducts.filter((product) => !initialProducts.some((initialProduct) => initialProduct.id === product.id));
       return [...mergedInitialProducts, ...customProducts.map(normalizeProduct)];
     } catch { return initialProducts; }

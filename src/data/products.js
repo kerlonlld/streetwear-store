@@ -27,7 +27,7 @@ export const initialProducts = [
   },
   {
     id: 'hemparia-shirt',
-    name: 'Camisa Hemparia',
+    name: 'Camisa Social Preta',
     category: 'Camisas',
     description: 'Camisa preta de corte essencial com a assinatura Hemparia em destaque sutil.',
     price: 189.9,
